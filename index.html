@@ -988,6 +988,47 @@
             background-size: 10px 10px;
             opacity: 0.3;
         }
+        
+        /* Styles pour les résultats de recherche client */
+        .client-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+        }
+        
+        .client-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--gray-light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .client-item:last-child {
+            border-bottom: none;
+        }
+        
+        .client-item:hover {
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+        
+        .client-name {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .client-detail {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-top: 4px;
+        }
+        
+        #clientSourceIndicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -1028,11 +1069,35 @@
         </div>
         
         <form id="configForm">
+            <!-- Section 0 : Recherche client KARLIA -->
+            <div class="form-section" id="section0">
+                <div class="section-header">
+                    <div class="section-number">0</div>
+                    <div class="section-title">Recherche client dans KARLIA</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="clientSearch">Rechercher un client</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" class="form-control" id="clientSearch" placeholder="Nom du client ou de la société...">
+                        <button type="button" class="btn" id="searchClientBtn" style="width: auto;">Rechercher</button>
+                    </div>
+                </div>
+                
+                <div id="searchResults" style="display: none; margin-top: 20px;">
+                    <h4 style="margin-bottom: 10px;">Résultats de la recherche</h4>
+                    <div id="clientResults" class="result-info" style="max-height: 200px; overflow-y: auto;"></div>
+                </div>
+            </div>
+            
             <!-- Section 1 : Informations client -->
             <div class="form-section" id="section1">
                 <div class="section-header">
                     <div class="section-number">1</div>
                     <div class="section-title">Informations client</div>
+                    <div id="clientSourceIndicator" style="display: none; margin-left: 20px; color: var(--success); font-size: 0.9rem;">
+                        <i class="fas fa-database"></i> Importé de KARLIA
+                    </div>
                 </div>
                 
                 <div class="form-grid">
@@ -1049,6 +1114,11 @@
                     <div class="form-group">
                         <label class="form-label" for="clientPhone">Téléphone</label>
                         <input type="text" class="form-control" id="clientPhone" name="clientPhone">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="clientAddress">Adresse</label>
+                        <textarea class="form-control" id="clientAddress" name="clientAddress" rows="3"></textarea>
                     </div>
                 </div>
             </div>
@@ -1662,7 +1732,7 @@
     <script>
         // Gestion de la progression du formulaire
         const updateProgress = () => {
-            const totalSections = 9;
+            const totalSections = 10; // Maintenant 10 sections au lieu de 9
             const visibleSections = totalSections;
             const progress = (visibleSections / totalSections) * 100;
             document.getElementById('progressFill').style.width = `${progress}%`;
@@ -1789,6 +1859,231 @@
                 pitchSelect.value = '5.9';
             }
         });
+        
+        // Intégration API KARLIA
+        const KARLIA_API_KEY = 'polopq-kpjsos-213914-1bj1ck-ppgwe2';
+        const KARLIA_API_BASE_URL = 'https://api.karlia.fr/v1'; // Ajustez si nécessaire
+
+        // Fonction pour rechercher des clients
+        async function searchKarliaClients(query) {
+            try {
+                // Encodage de la requête pour l'URL
+                const encodedQuery = encodeURIComponent(query);
+                
+                // Simulation de l'appel API (à remplacer par l'appel réel)
+                // const response = await fetch(`${KARLIA_API_BASE_URL}/clients/search?q=${encodedQuery}`, {
+                //     method: 'GET',
+                //     headers: {
+                //         'Authorization': `Bearer ${KARLIA_API_KEY}`,
+                //         'Content-Type': 'application/json'
+                //     }
+                // });
+                
+                // if (!response.ok) {
+                //     throw new Error(`Erreur API: ${response.status}`);
+                // }
+                
+                // const data = await response.json();
+                // return data.clients;
+                
+                // Simulation de résultats pour démonstration
+                return simulateKarliaClientSearch(query);
+            } catch (error) {
+                console.error('Erreur lors de la recherche de clients:', error);
+                return [];
+            }
+        }
+
+        // Fonction pour obtenir les détails d'un client
+        async function getKarliaClientDetails(clientId) {
+            try {
+                // Simulation de l'appel API (à remplacer par l'appel réel)
+                // const response = await fetch(`${KARLIA_API_BASE_URL}/clients/${clientId}`, {
+                //     method: 'GET',
+                //     headers: {
+                //         'Authorization': `Bearer ${KARLIA_API_KEY}`,
+                //         'Content-Type': 'application/json'
+                //     }
+                // });
+                
+                // if (!response.ok) {
+                //     throw new Error(`Erreur API: ${response.status}`);
+                // }
+                
+                // const data = await response.json();
+                // return data.client;
+                
+                // Simulation de résultats pour démonstration
+                return simulateKarliaClientDetails(clientId);
+            } catch (error) {
+                console.error('Erreur lors de la récupération des détails du client:', error);
+                return null;
+            }
+        }
+
+        // Fonction pour remplir les champs du formulaire avec les données du client
+        function populateClientFields(client) {
+            document.getElementById('clientName').value = client.company 
+                ? `${client.firstName} ${client.lastName} - ${client.company}` 
+                : `${client.firstName} ${client.lastName}`;
+            document.getElementById('clientEmail').value = client.email;
+            document.getElementById('clientPhone').value = client.phone;
+            
+            // Formater l'adresse
+            const addressParts = [];
+            if (client.address) addressParts.push(client.address);
+            if (client.postalCode || client.city) {
+                addressParts.push(`${client.postalCode || ''} ${client.city || ''}`.trim());
+            }
+            if (client.country) addressParts.push(client.country);
+            
+            document.getElementById('clientAddress').value = addressParts.join('\n');
+            
+            // Afficher l'indicateur de source
+            document.getElementById('clientSourceIndicator').style.display = 'block';
+        }
+
+        // Gestion de l'événement de recherche
+        document.getElementById('searchClientBtn').addEventListener('click', async function() {
+            const searchTerm = document.getElementById('clientSearch').value.trim();
+            
+            if (searchTerm.length < 2) {
+                alert('Veuillez saisir au moins 2 caractères pour la recherche.');
+                return;
+            }
+            
+            // Afficher un indicateur de chargement
+            document.getElementById('clientResults').innerHTML = '<p>Recherche en cours...</p>';
+            document.getElementById('searchResults').style.display = 'block';
+            
+            // Effectuer la recherche
+            const clients = await searchKarliaClients(searchTerm);
+            
+            // Afficher les résultats
+            if (clients.length === 0) {
+                document.getElementById('clientResults').innerHTML = '<p>Aucun client trouvé.</p>';
+            } else {
+                let resultsHtml = '<div class="client-list">';
+                clients.forEach(client => {
+                    resultsHtml += `
+                        <div class="client-item" style="padding: 10px; border-bottom: 1px solid var(--gray-light); cursor: pointer;" 
+                             data-client-id="${client.id}">
+                            <div style="font-weight: 600;">${client.company ? client.company : `${client.firstName} ${client.lastName}`}</div>
+                            <div style="font-size: 0.9rem; color: var(--gray);">
+                                ${client.company ? `${client.firstName} ${client.lastName} | ` : ''}
+                                ${client.email}
+                            </div>
+                        </div>
+                    `;
+                });
+                resultsHtml += '</div>';
+                document.getElementById('clientResults').innerHTML = resultsHtml;
+                
+                // Ajouter les événements de clic pour sélectionner un client
+                document.querySelectorAll('.client-item').forEach(item => {
+                    item.addEventListener('click', async function() {
+                        const clientId = this.getAttribute('data-client-id');
+                        const clientDetails = await getKarliaClientDetails(clientId);
+                        
+                        if (clientDetails) {
+                            populateClientFields(clientDetails);
+                            document.getElementById('searchResults').style.display = 'none';
+                            document.getElementById('clientSearch').value = '';
+                        }
+                    });
+                });
+            }
+        });
+
+        // Simulation de recherche de clients pour démonstration (à remplacer par l'appel API réel)
+        function simulateKarliaClientSearch(query) {
+            query = query.toLowerCase();
+            const demoClients = [
+                { id: '1', firstName: 'Jean', lastName: 'Dupont', company: 'Acme SAS', email: 'jean.dupont@acme.fr' },
+                { id: '2', firstName: 'Marie', lastName: 'Laurent', company: 'Tech Innovations', email: 'marie.laurent@techinno.fr' },
+                { id: '3', firstName: 'Pierre', lastName: 'Martin', company: 'Média Plus', email: 'p.martin@mediaplus.com' },
+                { id: '4', firstName: 'Sophie', lastName: 'Bernard', company: 'Écran Pro', email: 'sophie@ecranpro.fr' },
+                { id: '5', firstName: 'Thomas', lastName: 'Dubois', company: null, email: 'thomas.dubois@gmail.com' }
+            ];
+            
+            return demoClients.filter(client => {
+                const fullName = `${client.firstName} ${client.lastName}`.toLowerCase();
+                const company = client.company ? client.company.toLowerCase() : '';
+                const email = client.email.toLowerCase();
+                
+                return fullName.includes(query) || 
+                       company.includes(query) || 
+                       email.includes(query);
+            });
+        }
+
+        // Simulation de détails client pour démonstration (à remplacer par l'appel API réel)
+        function simulateKarliaClientDetails(clientId) {
+            const clientsDetails = {
+                '1': {
+                    id: '1',
+                    firstName: 'Jean',
+                    lastName: 'Dupont',
+                    company: 'Acme SAS',
+                    email: 'jean.dupont@acme.fr',
+                    phone: '+33 6 12 34 56 78',
+                    address: '123 Avenue de la République',
+                    postalCode: '75011',
+                    city: 'Paris',
+                    country: 'France'
+                },
+                '2': {
+                    id: '2',
+                    firstName: 'Marie',
+                    lastName: 'Laurent',
+                    company: 'Tech Innovations',
+                    email: 'marie.laurent@techinno.fr',
+                    phone: '+33 6 23 45 67 89',
+                    address: '45 Rue de l\'Innovation',
+                    postalCode: '69002',
+                    city: 'Lyon',
+                    country: 'France'
+                },
+                '3': {
+                    id: '3',
+                    firstName: 'Pierre',
+                    lastName: 'Martin',
+                    company: 'Média Plus',
+                    email: 'p.martin@mediaplus.com',
+                    phone: '+33 6 34 56 78 90',
+                    address: '78 Boulevard des Médias',
+                    postalCode: '33000',
+                    city: 'Bordeaux',
+                    country: 'France'
+                },
+                '4': {
+                    id: '4',
+                    firstName: 'Sophie',
+                    lastName: 'Bernard',
+                    company: 'Écran Pro',
+                    email: 'sophie@ecranpro.fr',
+                    phone: '+33 6 45 67 89 01',
+                    address: '156 Rue des Écrans',
+                    postalCode: '59000',
+                    city: 'Lille',
+                    country: 'France'
+                },
+                '5': {
+                    id: '5',
+                    firstName: 'Thomas',
+                    lastName: 'Dubois',
+                    company: null,
+                    email: 'thomas.dubois@gmail.com',
+                    phone: '+33 6 56 78 90 12',
+                    address: '29 Rue des Particuliers',
+                    postalCode: '44000',
+                    city: 'Nantes',
+                    country: 'France'
+                }
+            };
+            
+            return clientsDetails[clientId] || null;
+        }
         
         // Soumission du formulaire
         document.getElementById('configForm').addEventListener('submit', function(e) {
@@ -1985,6 +2280,13 @@
             // Appliquer le multiplicateur pour les écrans spéciaux
             panelBasePrice *= priceMultiplier;
             
+            // Calculer le prix total
+            const totalPrice = Math.round(totalPanels * panelBasePrice) + 
+                               (numScreens * 1200) + 
+                               (Math.ceil(totalPanels * (screenType === "standard" ? 0.5 : 0.7)) * 45) + 
+                               ((formData.redundancy ? 2 : 1) * numScreens * 12) + 
+                               (numScreens * 85);
+            
             // Générer la réponse
             return {
                 dimensions: {
@@ -2057,7 +2359,7 @@
                             total: numScreens * 85
                         }
                     ],
-                    totalPrice: 0 // Sera calculé ci-dessous
+                    totalPrice: totalPrice
                 }
             };
         }
