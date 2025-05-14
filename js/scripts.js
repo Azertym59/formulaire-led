@@ -7,17 +7,6 @@
  */
 
 // ==========================================================================
-// CONSTANTES ET CONFIGURATION
-// ==========================================================================
-
-// Configuration KARLIA - URL correcte
-const KARLIA_API_KEY = 'polopq-kpjsos-213914-1bj1ck-ppgwe2';
-const KARLIA_API_BASE_URL = '/api-proxy/app/api/v2'; // URL correcte avec version v2
-
-// Configuration de débogage
-const DEBUG = true; // Mettre à false en production
-
-// ==========================================================================
 // INITIALISATION
 // ==========================================================================
 
@@ -49,10 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialiser les actions des boutons de résultat
     initResultButtons();
     
-    // Afficher un message dans la console pour le débogage
-    if (DEBUG) {
-        console.log("Pour tester l'API KARLIA, exécutez window.testKarliaAPI() dans la console");
-    }
+    console.log("Configurateur d'écrans LED initialisé avec succès.");
 });
 
 // ==========================================================================
@@ -197,7 +183,7 @@ function initPitchRecommendation() {
 }
 
 // ==========================================================================
-// INTÉGRATION AVEC KARLIA
+// INTÉGRATION AVEC KARLIA (VERSION SIMPLIFIÉE)
 // ==========================================================================
 
 /**
@@ -209,6 +195,7 @@ function initKarliaSearch() {
 
 /**
  * Rechercher un client dans KARLIA
+ * Utilise un simple script PHP comme proxy pour contourner les restrictions CORS
  */
 async function searchClient() {
     const searchTerm = document.getElementById('clientSearch').value.trim();
@@ -223,145 +210,81 @@ async function searchClient() {
     document.getElementById('searchResults').style.display = 'block';
     
     try {
-        // Effectuer la recherche
-        const contacts = await searchKarliaClients(searchTerm);
+        // Appel direct au script PHP simplifié
+        const response = await fetch(`karlia-contacts.php?q=${encodeURIComponent(searchTerm)}`);
+        
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Si erreur dans la réponse
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        // Récupérer les contacts (adapter selon la structure retournée)
+        const contacts = data.items || data.contacts || data.data || [];
+        
+        if (contacts.length === 0) {
+            document.getElementById('clientResults').innerHTML = '<p>Aucun contact trouvé.</p>';
+            return;
+        }
         
         // Afficher les résultats
-        if (!contacts || contacts.length === 0) {
-            document.getElementById('clientResults').innerHTML = '<p>Aucun contact trouvé.</p>';
-        } else {
-            displaySearchResults(contacts);
-        }
+        displayKarliaContacts(contacts);
+        
     } catch (error) {
+        console.error('Erreur lors de la recherche:', error);
         document.getElementById('clientResults').innerHTML = `<p class="error">Erreur lors de la recherche: ${error.message}</p>`;
     }
 }
 
 /**
- * Affiche les résultats de recherche dans l'interface
- * @param {Array} contacts - Liste des contacts trouvés
+ * Affiche les contacts trouvés dans l'interface
+ * @param {Array} contacts - Liste des contacts à afficher
  */
-function displaySearchResults(contacts) {
-    let resultsHtml = '<div class="client-list">';
+function displayKarliaContacts(contacts) {
+    let html = '<div class="client-list">';
     
     contacts.forEach(contact => {
-        // Adapter ces propriétés à la structure réelle de KARLIA
-        const name = contact.first_name || contact.firstName || '';
+        // Adapter ces propriétés selon la structure réelle de KARLIA
+        const firstName = contact.first_name || contact.firstName || '';
         const lastName = contact.last_name || contact.lastName || '';
         const company = contact.company || '';
         const email = contact.email || '';
-        const id = contact.id || '';
         
-        resultsHtml += `
-            <div class="client-item" data-client-id="${id}">
-                <div class="client-name">${company ? company : `${name} ${lastName}`}</div>
+        html += `
+            <div class="client-item" data-contact-index="${contacts.indexOf(contact)}">
+                <div class="client-name">${company ? company : `${firstName} ${lastName}`.trim()}</div>
                 <div class="client-detail">
-                    ${company ? `${name} ${lastName} | ` : ''}
+                    ${company ? `${firstName} ${lastName}`.trim() + ' | ' : ''}
                     ${email}
                 </div>
             </div>
         `;
     });
     
-    resultsHtml += '</div>';
-    document.getElementById('clientResults').innerHTML = resultsHtml;
+    html += '</div>';
+    document.getElementById('clientResults').innerHTML = html;
     
-    // Ajouter les événements de clic pour sélectionner un client
+    // Stocker les contacts dans une variable globale temporaire pour faciliter la sélection
+    window._tempKarliaContacts = contacts;
+    
+    // Ajouter les événements de clic pour sélectionner un contact
     document.querySelectorAll('.client-item').forEach(item => {
-        item.addEventListener('click', selectClient);
+        item.addEventListener('click', function() {
+            const contactIndex = parseInt(this.getAttribute('data-contact-index'));
+            const selectedContact = window._tempKarliaContacts[contactIndex];
+            
+            if (selectedContact) {
+                populateClientFields(selectedContact);
+                document.getElementById('searchResults').style.display = 'none';
+                document.getElementById('clientSearch').value = '';
+            }
+        });
     });
-}
-
-/**
- * Sélectionner un client dans les résultats de recherche
- */
-async function selectClient() {
-    const clientId = this.getAttribute('data-client-id');
-    
-    try {
-        // Afficher un indicateur de chargement
-        this.classList.add('loading');
-        
-        const clientDetails = await getKarliaClientDetails(clientId);
-        
-        if (clientDetails) {
-            populateClientFields(clientDetails);
-            document.getElementById('searchResults').style.display = 'none';
-            document.getElementById('clientSearch').value = '';
-        } else {
-            alert('Impossible de récupérer les détails du contact.');
-        }
-    } catch (error) {
-        alert(`Erreur: ${error.message}`);
-    } finally {
-        this.classList.remove('loading');
-    }
-}
-
-/**
- * Recherche de contacts dans KARLIA
- * @param {string} query - Terme de recherche
- * @returns {Array} Liste des contacts correspondants
- */
-async function searchKarliaClients(query) {
-    try {
-        const encodedQuery = encodeURIComponent(query);
-        
-        // Utilisation de l'URL correcte avec v2
-        const response = await fetch(`${KARLIA_API_BASE_URL}/contacts?q=${encodedQuery}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${KARLIA_API_KEY}`,
-                'Accept': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Erreur API: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        if (DEBUG) console.log("Données contacts reçues:", data);
-        
-        // Adapter selon la structure réelle de l'API v2
-        return data.items || data.contacts || data.data || data;
-    } catch (error) {
-        console.error('Erreur lors de la recherche de contacts:', error);
-        handleApiError(error, "recherche de contacts");
-        return [];
-    }
-}
-
-/**
- * Obtention des détails d'un contact KARLIA
- * @param {string} contactId - ID du contact
- * @returns {Object} Détails du contact
- */
-async function getKarliaClientDetails(contactId) {
-    try {
-        // Utilisation de l'URL correcte avec v2
-        const response = await fetch(`${KARLIA_API_BASE_URL}/contacts/${contactId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${KARLIA_API_KEY}`,
-                'Accept': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Erreur API: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        if (DEBUG) console.log("Détails contact reçus:", data);
-        
-        // Adapter selon la structure réelle de l'API v2
-        return data.contact || data.data || data;
-    } catch (error) {
-        console.error('Erreur lors de la récupération des détails du contact:', error);
-        handleApiError(error, "récupération des détails du contact");
-        return null;
-    }
 }
 
 /**
@@ -369,19 +292,24 @@ async function getKarliaClientDetails(contactId) {
  * @param {Object} contact - Données du contact KARLIA
  */
 function populateClientFields(contact) {
-    if (DEBUG) console.log("Remplissage des champs avec:", contact);
+    // Adapter selon la structure réelle de KARLIA
+    const firstName = contact.first_name || contact.firstName || '';
+    const lastName = contact.last_name || contact.lastName || '';
+    const company = contact.company || '';
     
-    // Adaptation basée sur la structure probable des données de l'API KARLIA
-    // Ces champs peuvent nécessiter des ajustements selon la structure réelle
-    document.getElementById('clientName').value = contact.company 
-        ? `${contact.first_name || contact.firstName} ${contact.last_name || contact.lastName} - ${contact.company}` 
-        : `${contact.first_name || contact.firstName} ${contact.last_name || contact.lastName}`;
+    // Remplir le champ Nom/Société
+    document.getElementById('clientName').value = company 
+        ? `${firstName} ${lastName} - ${company}`.trim() 
+        : `${firstName} ${lastName}`.trim();
     
+    // Remplir le champ Email
     document.getElementById('clientEmail').value = contact.email || '';
-    document.getElementById('clientPhone').value = contact.phone || contact.phone_number || '';
     
-    // Formater l'adresse selon la structure KARLIA
-    const addressParts = [];
+    // Remplir le champ Téléphone (essayer plusieurs propriétés possibles)
+    document.getElementById('clientPhone').value = contact.phone || contact.phone_number || contact.mobile || '';
+    
+    // Essayer de construire l'adresse à partir des informations disponibles
+    let addressParts = [];
     
     // Si l'adresse est un objet complet
     if (contact.address && typeof contact.address === 'object') {
@@ -391,7 +319,7 @@ function populateClientFields(contact) {
         }
         if (contact.address.country) addressParts.push(contact.address.country);
     } 
-    // Si l'adresse est en propriétés distinctes
+    // Si l'adresse est en propriétés distinctes (ou chaîne simple)
     else {
         if (contact.street || contact.address) addressParts.push(contact.street || contact.address);
         if (contact.postal_code || contact.postalCode || contact.city) {
@@ -404,27 +332,6 @@ function populateClientFields(contact) {
     
     // Afficher l'indicateur de source
     document.getElementById('clientSourceIndicator').style.display = 'block';
-}
-
-/**
- * Gestion des erreurs API
- * @param {Error} error - Erreur survenue
- * @param {string} operation - Description de l'opération en cours
- */
-function handleApiError(error, operation) {
-    console.error(`Erreur lors de ${operation}:`, error);
-    
-    let message = "Une erreur est survenue lors de la communication avec KARLIA.";
-    
-    if (error.message.includes('401')) {
-        message = "Erreur d'authentification. Vérifiez votre clé API KARLIA.";
-    } else if (error.message.includes('404')) {
-        message = "Ressource non trouvée. Vérifiez les identifiants et URLs.";
-    } else if (error.message.includes('5')) {
-        message = "Erreur serveur KARLIA. Veuillez réessayer plus tard.";
-    }
-    
-    alert(message);
 }
 
 // ==========================================================================
@@ -775,80 +682,4 @@ function simulateResponse(formData) {
             totalPrice: totalPrice
         }
     };
-}
-
-// ==========================================================================
-// FONCTIONS DE TEST ET DE DÉBOGAGE
-// ==========================================================================
-
-/**
- * Fonction de test pour l'API KARLIA v2
- * À utiliser dans la console du navigateur
- */
-window.testKarliaAPI = async function() {
-    try {
-        console.log("Test de connexion à l'API KARLIA v2...");
-        
-        // Test simple pour vérifier l'authentification
-        const response = await fetch(`${KARLIA_API_BASE_URL}/contacts?limit=1`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${KARLIA_API_KEY}`,
-                'Accept': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Erreur API: ${response.status} - ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        console.log("Test de connexion réussi - Réponse:", data);
-        
-        // Test de récupération des contacts (limité à 5)
-        const contactsResponse = await fetch(`${KARLIA_API_BASE_URL}/contacts?limit=5`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${KARLIA_API_KEY}`,
-                'Accept': 'application/json'
-            }
-        });
-        
-        if (!contactsResponse.ok) {
-            throw new Error(`Erreur API contacts: ${contactsResponse.status} - ${contactsResponse.statusText}`);
-        }
-        
-        const contactsData = await contactsResponse.json();
-        console.log("Exemple de contacts récupérés:", contactsData);
-        
-        // Analyse de la structure pour comprendre le format des données dans v2
-        console.log("Structure de la réponse:", {
-            "Type de données": typeof contactsData,
-            "Clés principales": Object.keys(contactsData),
-            "Format des contacts": contactsData.items || contactsData.contacts || contactsData.data 
-                ? "Collection d'objets" 
-                : "Format inconnu"
-        });
-        
-        // Affiche la structure d'un contact pour comprendre le format
-        const contactsArray = contactsData.items || contactsData.contacts || contactsData.data || [];
-        if (contactsArray.length > 0) {
-            console.log("Structure d'un contact:", contactsArray[0]);
-            console.log("Clés disponibles dans un contact:", Object.keys(contactsArray[0]));
-        }
-        
-        return "Test terminé, voir console pour les détails";
-    } catch (error) {
-        console.error("Erreur lors du test de l'API KARLIA:", error);
-        return `Erreur: ${error.message}`;
-    }
-};
-
-/**
- * Fonction utilitaire de journalisation
- */
-function log(...args) {
-    if (DEBUG) {
-        console.log(...args);
-    }
 }
