@@ -1,0 +1,17 @@
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers d'environnement avec données sensibles
+.env
+config.js
+
+# Dossiers de dépendances
+node_modules/
+
+# Fichiers de build
+/dist
+/build
+
+# Logs
+*.log
