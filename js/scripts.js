@@ -12,7 +12,7 @@
 
 // Configuration KARLIA - URL correcte
 const KARLIA_API_KEY = 'polopq-kpjsos-213914-1bj1ck-ppgwe2';
-const KARLIA_API_BASE_URL = 'https://karlia.fr/app/api/v2'; // URL correcte avec version v2
+const KARLIA_API_BASE_URL = '/api-proxy/app/api/v2'; // URL correcte avec version v2
 
 // Configuration de débogage
 const DEBUG = true; // Mettre à false en production
