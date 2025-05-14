@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurateur d'Écrans LED Professionnel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #10b981;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --gray-light: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            color: var(--dark);
+            background-color: #f5f7fa;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: linear-gradient(135deg, rgba(37, 99, 235, 0.03) 0%, rgba(16, 185, 129, 0.03) 100%);
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: white;
+            padding: 20px 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo img {
+            height: 50px;
+            margin-right: 12px;
+        }
+        
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+        
+        .logo-text span {
+            color: var(--secondary);
+        }
+        
+        .page-title {
+            text-align: center;
+            margin: 40px 0;
+            color: var(--dark);
+            font-weight: 700;
+            font-size: 2.2rem;
+            letter-spacing: -1px;
+        }
+        
+        .page-title span {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        
+        .progress-bar {
+            margin: 30px auto 50px;
+            max-width: 700px;
+            position: relative;
+        }
+        
+        .progress-track {
+            height: 6px;
+            background-color: var(--gray-light);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            position: relative;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+        }
+        
+        .step-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--gray-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            font-size: 16px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active .step-icon {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.2);
+        }
+        
+        .step.completed .step-icon {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .step.active .step-label, .step.completed .step-label {
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .form-section {
+            background-color: white;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border: 1px solid var(--gray-light);
+            overflow: hidden;
+        }
+        
+        .form-section:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        
+        .section-header {
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-right: 16px;
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.25);
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--dark);
+            flex: 1;
+        }
+        
+        .section-icon {
+            font-size: 1.6rem;
+            margin-right: 16px;
+            color: var(--primary);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark);
+            font-size: 1rem;
+        }
+        
+        .sublabel {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin: 4px 0 8px;
+            line-height: 1.4;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: var(--light);
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            color: var(--dark);
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        
+        .select-wrapper {
+            position: relative;
+        }
+        
+        .select-wrapper::after {
+            content: "↓";
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            pointer-events: none;
+        }
+        
+        select.form-control {
+            appearance: none;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+        
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+        }
+        
+        .checkbox-item, .radio-item {
+            position: relative;
+            margin-right: 0;
+        }
+        
+        .custom-checkbox, .custom-radio {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 16px;
+            background-color: var(--light);
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .custom-checkbox:hover, .custom-radio:hover {
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+        
+        .checkbox-item input[type="checkbox"], .radio-item input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .checkbox-item input[type="checkbox"]:checked + .custom-checkbox,
+        .radio-item input[type="radio"]:checked + .custom-radio {
+            background-color: rgba(37, 99, 235, 0.1);
+            border-color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .checkbox-item input[type="checkbox"]:checked + .custom-checkbox::before,
+        .radio-item input[type="radio"]:checked + .custom-radio::before {
+            content: "";
+            width: 16px;
+            height: 16px;
+            background-color: var(--primary);
+            border-radius: 4px;
+            margin-right: 8px;
+            display: inline-block;
+            position: relative;
+        }
+        
+        .checkbox-item input[type="checkbox"]:checked + .custom-checkbox::after {
+            content: "✓";
+            color: white;
+            position: absolute;
+            left: 20px;
+            top: 9px;
+            font-size: 12px;
+        }
+        
+        .radio-item input[type="radio"]:checked + .custom-radio::before {
+            border-radius: 50%;
+        }
+        
+        .radio-item input[type="radio"]:checked + .custom-radio::after {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            left: 25px;
+            top: 17px;
+        }
+        
+        .dimensions-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .dimensions-group .form-control {
+            width: 120px;
+            text-align: center;
+        }
+        
+        .dimensions-group span {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .hint {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        
+        .special-options {
+            background-color: rgba(37, 99, 235, 0.03);
+            border-left: 3px solid var(--primary);
+            padding: 16px;
+            margin: 16px 0 24px 24px;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .special-options .form-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 24px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.25);
+            font-family: inherit;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--dark);
+            border: 1px solid var(--gray-light);
+            box-shadow: var(--shadow);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--light);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px 0;
+            display: none;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(37, 99, 235, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        #results {
+            display: none;
+            margin-top: 50px;
+        }
+        
+        .results-content {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        
+        .results-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 20px 28px;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .results-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .results-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .results-body {
+            padding: 28px;
+        }
+        
+        .result-section {
+            margin-bottom: 28px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        .result-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .result-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--dark);
+        }
+        
+        .result-info {
+            background-color: var(--light);
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .processor-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .processor-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        .processor-item:last-child {
+            border-bottom: none;
+        }
+        
+        .processor-info {
+            flex: 1;
+        }
+        
+        .processor-model {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .processor-screen {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+        
+        .processor-usage {
+            background-color: var(--light);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--dark);
+            font-weight: 500;
+        }
+        
+        .pricing-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+        
+        .pricing-table th {
+            background-color: var(--light);
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+        
+        .pricing-table td {
+            padding: 12px 16px;
+            border-top: 1px solid var(--gray-light);
+            color: var(--dark);
+        }
+        
+        .pricing-table tr:nth-child(even) td {
+            background-color: rgba(37, 99, 235, 0.02);
+        }
+        
+        .pricing-table tfoot td {
+            background-color: var(--light);
+            font-weight: 600;
+            color: var(--dark);
+            border-top: 2px solid var(--gray-light);
+        }
+        
+        .price {
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-weight: 500;
+        }
+        
+        .total-price {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+        
+        .actions-panel {
+            display: flex;
+            gap: 16px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: none;
+            font-family: inherit;
+        }
+        
+        .action-btn i {
+            font-size: 1.1rem;
+        }
+        
+        .action-btn.primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.25);
+        }
+        
+        .action-btn.primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        .action-btn.secondary {
+            background-color: white;
+            color: var(--dark);
+            border: 1px solid var(--gray-light);
+            box-shadow: var(--shadow);
+        }
+        
+        .action-btn.secondary:hover {
+            background-color: var(--light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .section-divider {
+            display: flex;
+            align-items: center;
+            margin: 30px 0;
+        }
+        
+        .divider {
+            flex: 1;
+            height: 1px;
+            background-color: var(--gray-light);
+        }
+        
+        .divider-text {
+            padding: 0 16px;
+            color: var(--gray);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 16px 0;
+        }
+        
+        .feature-item {
+            padding: 8px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .feature-icon {
+            color: var(--success);
+            font-size: 1rem;
+            margin-top: 2px;
+        }
+        
+        .tooltip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--gray-light);
+            color: var(--gray);
+            font-size: 12px;
+            margin-left: 8px;
+            cursor: help;
+            position: relative;
+        }
+        
+        .tooltip-content {
+            visibility: hidden;
+            width: 220px;
+            background-color: var(--dark);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px 12px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-weight: normal;
+            font-size: 0.8rem;
+            box-shadow: var(--shadow);
+            pointer-events: none;
+        }
+        
+        .tooltip-content::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--dark) transparent transparent transparent;
+        }
+        
+        .tooltip-icon:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .range-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .range-slider-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+        }
+        
+        .range-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+        
+        .range-value {
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 5px;
+            background: var(--gray-light);
+            outline: none;
+            transition: background 0.3s;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        input[type="range"]::-moz-range-thumb:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-right: 10px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--gray-light);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .toggle-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .toggle-text {
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .dimensions-group {
+                flex-wrap: wrap;
+            }
+            
+            .dimensions-group .form-control {
+                width: 100%;
+            }
+            
+            .checkbox-group, .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .actions-panel {
+                flex-direction: column;
+            }
+            
+            .action-btn {
+                width: 100%;
+            }
+            
+            .progress-steps {
+                display: none;
+            }
+        }
+
+        /* Style spécifique pour la section Transparent */
+        .transparent-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 150px;
+            background-image: linear-gradient(45deg, #f5f5f5 25%, transparent 25%, transparent 75%, #f5f5f5 75%, #f5f5f5), 
+                              linear-gradient(45deg, #f5f5f5 25%, transparent 25%, transparent 75%, #f5f5f5 75%, #f5f5f5);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            border-radius: 8px;
+            margin: 16px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .transparency-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(16, 185, 129, 0.3);
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .transparent-panel {
+            width: 80%;
+            height: 70%;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--primary);
+            position: relative;
+        }
+        
+        .transparent-dots {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(circle, var(--primary) 1px, transparent 1px);
+            background-size: 10px 10px;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <img src="https://via.placeholder.com/50x50?text=LED" alt="Logo">
+                <div class="logo-text">LED<span>Pro</span> Configurator</div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <h1 class="page-title">Configurateur d'<span>Écrans LED</span> Professionnel</h1>
+        
+        <div class="progress-bar">
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-steps">
+                <div class="step active" data-step="1">
+                    <div class="step-icon">1</div>
+                    <div class="step-label">Projet</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-icon">2</div>
+                    <div class="step-label">Spécifications</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-icon">3</div>
+                    <div class="step-label">Installation</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-icon">4</div>
+                    <div class="step-label">Configuration</div>
+                </div>
+            </div>
+        </div>
+        
+        <form id="configForm">
+            <!-- Section 1 : Informations client -->
+            <div class="form-section" id="section1">
+                <div class="section-header">
+                    <div class="section-number">1</div>
+                    <div class="section-title">Informations client</div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="clientName">Nom / Société</label>
+                        <input type="text" class="form-control" id="clientName" name="clientName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="clientEmail">Email</label>
+                        <input type="email" class="form-control" id="clientEmail" name="clientEmail" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="clientPhone">Téléphone</label>
+                        <input type="text" class="form-control" id="clientPhone" name="clientPhone">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section 2 : Usage de l'écran -->
+            <div class="form-section" id="section2">
+                <div class="section-header">
+                    <div class="section-number">2</div>
+                    <div class="section-title">Usage de l'écran</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="screenPurpose">À quoi va servir l'écran ?</label>
+                    <div class="select-wrapper">
+                        <select class="form-control" id="screenPurpose" name="screenPurpose" required>
+                            <option value="">Sélectionnez...</option>
+                            <option value="publicité">Publicité / Affichage commercial</option>
+                            <option value="événement">Événement ponctuel</option>
+                            <option value="sportif">Affichage sportif (stade, gymnase)</option>
+                            <option value="concert">Concert / Spectacle</option>
+                            <option value="vitrine">Vitrine / Showroom</option>
+                            <option value="information">Information / Communication</option>
+                            <option value="autre">Autre (précisez)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="otherPurposeGroup" style="display: none;">
+                    <label class="form-label" for="otherPurpose">Précisez l'usage</label>
+                    <input type="text" class="form-control" id="otherPurpose" name="otherPurpose">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Environnement d'installation</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="indoor" name="environment" value="indoor" checked>
+                            <label class="custom-radio" for="indoor">Intérieur</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="outdoor" name="environment" value="outdoor">
+                            <label class="custom-radio" for="outdoor">Extérieur</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Installation</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="fixe" name="installation" value="fixe" checked>
+                            <label class="custom-radio" for="fixe">Fixe</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="mobile" name="installation" value="mobile">
+                            <label class="custom-radio" for="mobile">Mobile (remorque, structure mobile)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section 3 : Dimensions & Format -->
+            <div class="form-section" id="section3">
+                <div class="section-header">
+                    <div class="section-number">3</div>
+                    <div class="section-title">Dimensions & Format</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="dimensions">Dimensions souhaitées</label>
+                    <div class="dimensions-group">
+                        <input type="number" class="form-control" id="width" name="width" step="0.01" min="0.5" value="2.5" required>
+                        <span>×</span>
+                        <input type="number" class="form-control" id="height" name="height" step="0.01" min="0.5" value="1.5" required>
+                        <span>mètres</span>
+                    </div>
+                    <span class="hint">Largeur × Hauteur en mètres</span>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="numScreens">Nombre d'écrans</label>
+                    <input type="number" class="form-control" id="numScreens" name="numScreens" min="1" value="2" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Besoin d'affichages différents sur plusieurs écrans ?</label>
+                    <div class="toggle-options">
+                        <label class="toggle-label" for="separateDisplaysYes">
+                            <span class="toggle-text">Non (même contenu)</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="separateDisplaysYes" name="separateDisplays" value="true" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <label class="toggle-label" for="separateDisplaysYes">
+                            <span class="toggle-text">Oui (contenus différents)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="spaceConstraints">Avez-vous des contraintes d'espace particulières ?</label>
+                    <textarea class="form-control" id="spaceConstraints" name="spaceConstraints" placeholder="Décrivez les contraintes éventuelles (hauteur de plafond, largeur maximale, etc.)"></textarea>
+                </div>
+            </div>
+            
+            <!-- Section 4 : Distance de visualisation et définition -->
+            <div class="form-section" id="section4">
+                <div class="section-header">
+                    <div class="section-number">4</div>
+                    <div class="section-title">Distance de visualisation et définition</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="viewingDistance">À quelle distance les spectateurs vont-ils regarder l'écran ?</label>
+                    <div class="select-wrapper">
+                        <select class="form-control" id="viewingDistance" name="viewingDistance" required>
+                            <option value="">Sélectionnez...</option>
+                            <option value="proche">Très proche (1-3m)</option>
+                            <option value="moyen">Distance moyenne (3-8m)</option>
+                            <option value="loin">Longue distance (8-15m)</option>
+                            <option value="très loin">Très longue distance (15m+)</option>
+                        </select>
+                    </div>
+                    <span class="hint">Cette information nous aide à déterminer le pitch optimal (taille des pixels)</span>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="pitchPreference">Préférence de pitch (si vous avez une idée précise)</label>
+                    <div class="select-wrapper">
+                        <select class="form-control" id="pitchPreference" name="pitchPreference">
+                            <option value="">Pas de préférence (nous recommanderons)</option>
+                            <option value="1.9">P1.9 (Très haute définition, intérieur)</option>
+                            <option value="2.6">P2.6 (Haute définition, intérieur)</option>
+                            <option value="3.9">P3.9 (Standard intérieur)</option>
+                            <option value="4.8">P4.8 (Intérieur/Extérieur)</option>
+                            <option value="5.9">P5.9 (Standard extérieur)</option>
+                            <option value="8.0">P8 ou plus (Longue distance, extérieur)</option>
+                        </select>
+                    </div>
+                    <span class="hint">Plus le chiffre est petit, plus la définition est élevée</span>
+                </div>
+            </div>
+            
+            <!-- Section 5 : Luminosité et environnement -->
+            <div class="form-section" id="section5">
+                <div class="section-header">
+                    <div class="section-number">5</div>
+                    <div class="section-title">Luminosité et environnement</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">L'écran sera-t-il exposé au soleil directement ?</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="sunExposureYes" name="sunExposure" value="yes">
+                            <label class="custom-radio" for="sunExposureYes">Oui</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="sunExposurePartial" name="sunExposure" value="partial">
+                            <label class="custom-radio" for="sunExposurePartial">Partiellement</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="sunExposureNo" name="sunExposure" value="no" checked>
+                            <label class="custom-radio" for="sunExposureNo">Non</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Utilisation principale</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="dayUse" name="dayUse" checked>
+                            <label class="custom-checkbox" for="dayUse">Jour</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="nightUse" name="nightUse">
+                            <label class="custom-checkbox" for="nightUse">Nuit</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="brightness">Luminosité recommandée (basée sur vos sélections)</label>
+                    <div class="select-wrapper">
+                        <select class="form-control" id="brightness" name="brightness">
+                            <option value="800">800 nits (intérieur, faible luminosité)</option>
+                            <option value="1000" selected>1000 nits (intérieur standard)</option>
+                            <option value="2500">2500 nits (vitrine, semi-extérieur)</option>
+                            <option value="5000">5000 nits (extérieur)</option>
+                            <option value="7500">7500+ nits (plein soleil)</option>
+                        </select>
+                    </div>
+                    <span class="hint">Sera automatiquement ajusté selon vos autres choix</span>
+                </div>
+            </div>
+            
+            <!-- Section 6 : Type d'écran spécial -->
+            <div class="form-section" id="section6">
+                <div class="section-header">
+                    <div class="section-number">6</div>
+                    <div class="section-title">Type d'écran spécial</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Type d'écran</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="screenTypeStandard" name="screenType" value="standard" checked>
+                            <label class="custom-radio" for="screenTypeStandard">Standard (plat)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="screenTypeCubic" name="screenType" value="cubic">
+                            <label class="custom-radio" for="screenTypeCubic">Cubique</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="screenTypeFlex" name="screenType" value="flex">
+                            <label class="custom-radio" for="screenTypeFlex">Flexible</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="screenTypeTransparent" name="screenType" value="transparent">
+                            <label class="custom-radio" for="screenTypeTransparent">Transparent</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="screenTypeSemiTransparent" name="screenType" value="semitransparent">
+                            <label class="custom-radio" for="screenTypeSemiTransparent">Semi-transparent</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Options pour écrans cubiques -->
+                <div id="cubicOptions" class="special-options" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label" for="cubeFaces">Nombre de faces visibles par cube</label>
+                        <div class="select-wrapper">
+                            <select class="form-control" id="cubeFaces" name="cubeFaces">
+                                <option value="3">3 faces</option>
+                                <option value="4" selected>4 faces</option>
+                                <option value="5">5 faces</option>
+                                <option value="6">6 faces (cube complet)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="cubeArrangement">Disposition des cubes</label>
+                        <div class="select-wrapper">
+                            <select class="form-control" id="cubeArrangement" name="cubeArrangement">
+                                <option value="grid" selected>Grille régulière</option>
+                                <option value="pyramid">Pyramide</option>
+                                <option value="random">Disposition irrégulière</option>
+                                <option value="custom">Personnalisée</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Options pour écrans flex -->
+                <div id="flexOptions" class="special-options" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label" for="flexCurveRadius">Rayon de courbure approximatif</label>
+                        <div class="range-slider-container">
+                            <div class="range-value" id="flexRadiusValue">2.0 m</div>
+                            <input type="range" id="flexCurveRadius" name="flexCurveRadius" min="0.5" max="5" step="0.1" value="2" class="range-slider">
+                            <div class="range-labels">
+                                <span class="range-label">0.5m</span>
+                                <span class="range-label">5m</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="flexAngle">Angle de courbure approximatif</label>
+                        <div class="select-wrapper">
+                            <select class="form-control" id="flexAngle" name="flexAngle">
+                                <option value="30">Léger (≈30°)</option>
+                                <option value="90" selected>Quart de cercle (90°)</option>
+                                <option value="180">Demi-cercle (180°)</option>
+                                <option value="360">Cercle complet (360°)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="flexMounting">Type de support</label>
+                        <div class="select-wrapper">
+                            <select class="form-control" id="flexMounting" name="flexMounting">
+                                <option value="wall" selected>Mur courbe</option>
+                                <option value="column">Colonne/Pilier</option>
+                                <option value="suspended">Suspendu</option>
+                                <option value="freestanding">Autoportant</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Options pour écrans transparents -->
+                <div id="transparentOptions" class="special-options" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label" for="transparencyLevel">Niveau de transparence</label>
+                        <div class="range-slider-container">
+                            <div class="range-value" id="transparencyValue">70%</div>
+                            <input type="range" id="transparencyLevel" name="transparencyLevel" min="30" max="95" step="5" value="70" class="range-slider">
+                            <div class="range-labels">
+                                <span class="range-label">Faible (30%)</span>
+                                <span class="range-label">Élevé (95%)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="transparent-preview">
+                            <div class="transparency-overlay" id="transparencyOverlay" style="opacity: 0.3;"></div>
+                            <div class="transparent-panel">
+                                <div class="transparent-dots"></div>
+                                Aperçu de transparence
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="transparentApplication">Application principale</label>
+                        <div class="select-wrapper">
+                            <select class="form-control" id="transparentApplication" name="transparentApplication">
+                                <option value="window" selected>Vitrine commerciale</option>
+                                <option value="glass-facade">Façade vitrée</option>
+                                <option value="museum">Musée / Exposition</option>
+                                <option value="stage">Scène / Événement</option>
+                                <option value="other">Autre</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Compatible avec l'arrière-projection ?</label>
+                        <div class="toggle-options">
+                            <label class="toggle-label" for="rearProjection">
+                                <span class="toggle-text">Non</span>
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="rearProjection" name="rearProjection" value="true">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <label class="toggle-label" for="rearProjection">
+                                <span class="toggle-text">Oui</span>
+                            </label>
+                        </div>
+                        <span class="hint">Permet de projeter une image depuis l'arrière de l'écran</span>
+                    </div>
+                </div>
+                
+                <!-- Options pour écrans semi-transparents -->
+                <div id="semiTransparentOptions" class="special-options" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label" for="semiTransparencyLevel">Niveau de transparence</label>
+                        <div class="range-slider-container">
+                            <div class="range-value" id="semiTransparencyValue">40%</div>
+                            <input type="range" id="semiTransparencyLevel" name="semiTransparencyLevel" min="20" max="60" step="5" value="40" class="range-slider">
+                            <div class="range-labels">
+                                <span class="range-label">Faible (20%)</span>
+                                <span class="range-label">Medium (60%)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="transparent-preview">
+                            <div class="transparency-overlay" id="semiTransparencyOverlay" style="opacity: 0.6;"></div>
+                            <div class="transparent-panel">
+                                <div class="transparent-dots"></div>
+                                Aperçu de semi-transparence
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="pixelDensity">Densité de pixels</label>
+                        <div class="select-wrapper">
+                            <select class="form-control" id="pixelDensity" name="pixelDensity">
+                                <option value="low">Faible (intégration architecturale)</option>
+                                <option value="medium" selected>Moyenne (affichage standard)</option>
+                                <option value="high">Élevée (affichage détaillé)</option>
+                            </select>
+                        </div>
+                        <span class="hint">Affecte la visibilité du contenu et le niveau de transparence</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section 7 : Spécifications techniques -->
+            <div class="form-section" id="section7">
+                <div class="section-header">
+                    <div class="section-number">7</div>
+                    <div class="section-title">Spécifications techniques</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="panelSize">Taille de dalle préférée</label>
+                    <div class="select-wrapper">
+                        <select class="form-control" id="panelSize" name="panelSize" required>
+                            <option value="500x500" selected>500×500 mm (standard)</option>
+                            <option value="500x1000">500×1000 mm</option>
+                            <option value="576x576">576×576 mm</option>
+                            <option value="600x384">600×384 mm</option>
+                            <option value="640x640">640×640 mm</option>
+                            <option value="960x960">960×960 mm</option>
+                        </select>
+                    </div>
+                    <span class="hint">Dimensions des modules LED individuels</span>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Besoin de redondance des systèmes critiques ?</label>
+                    <div class="toggle-options">
+                        <label class="toggle-label" for="redundancyYes">
+                            <span class="toggle-text">Non</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="redundancyYes" name="redundancy" value="true" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <label class="toggle-label" for="redundancyYes">
+                            <span class="toggle-text">Oui</span>
+                        </label>
+                    </div>
+                    <span class="hint">Recommandé pour les installations critiques et événements importants</span>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Besoin d'un écran tout-en-un avec régie intégrée ?</label>
+                    <div class="toggle-options">
+                        <label class="toggle-label" for="allInOneYes">
+                            <span class="toggle-text">Non</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="allInOneYes" name="allInOne" value="yes">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <label class="toggle-label" for="allInOneYes">
+                            <span class="toggle-text">Oui</span>
+                        </label>
+                    </div>
+                    <span class="hint">Solution complète avec processeur intégré et gestion de contenu</span>
+                </div>
+            </div>
+            
+            <!-- Section 8 : Installation et maintenance -->
+            <div class="form-section" id="section8">
+                <div class="section-header">
+                    <div class="section-number">8</div>
+                    <div class="section-title">Installation et maintenance</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="mountingMethod">Méthode d'installation préférée</label>
+                    <div class="select-wrapper">
+                        <select class="form-control" id="mountingMethod" name="mountingMethod" required>
+                            <option value="">Sélectionnez...</option>
+                            <option value="mural">Fixation murale</option>
+                            <option value="suspendu">Suspendu (accroché au plafond)</option>
+                            <option value="pied">Sur pied/structure au sol</option>
+                            <option value="remorque">Sur remorque/véhicule</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="otherMountingGroup" style="display: none;">
+                    <label class="form-label" for="otherMounting">Précisez la méthode d'installation</label>
+                    <input type="text" class="form-control" id="otherMounting" name="otherMounting">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Souhaitez-vous un contrat de maintenance ?</label>
+                    <div class="toggle-options">
+                        <label class="toggle-label" for="maintenanceYes">
+                            <span class="toggle-text">Non</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="maintenanceYes" name="maintenanceContract" value="yes">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <label class="toggle-label" for="maintenanceYes">
+                            <span class="toggle-text">Oui</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Avez-vous besoin d'un SAV rapide sur site ?</label>
+                    <div class="toggle-options">
+                        <label class="toggle-label" for="rapidSAVYes">
+                            <span class="toggle-text">Non</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="rapidSAVYes" name="rapidSAV" value="yes">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <label class="toggle-label" for="rapidSAVYes">
+                            <span class="toggle-text">Oui</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section 9 : Budget et délai -->
+            <div class="form-section" id="section9">
+                <div class="section-header">
+                    <div class="section-number">9</div>
+                    <div class="section-title">Budget et délai</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="budget">Budget estimé (€ HT)</label>
+                    <div class="select-wrapper">
+                        <select class="form-control" id="budget" name="budget">
+                            <option value="">Préfère ne pas préciser</option>
+                            <option value="moins de 5000">Moins de 5 000€</option>
+                            <option value="5000-10000">5 000€ - 10 000€</option>
+                            <option value="10000-20000">10 000€ - 20 000€</option>
+                            <option value="20000-50000">20 000€ - 50 000€</option>
+                            <option value="plus de 50000">Plus de 50 000€</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="deadline">Pour quand avez-vous besoin de l'écran ?</label>
+                    <input type="date" class="form-control" id="deadline" name="deadline">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="additionalInfo">Informations complémentaires</label>
+                    <textarea class="form-control" id="additionalInfo" name="additionalInfo" placeholder="Toute autre information que vous souhaitez nous communiquer..."></textarea>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-block">Calculer ma configuration</button>
+        </form>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Calcul de votre configuration en cours...</p>
+        </div>
+        
+        <div id="results">
+            <div class="results-content">
+                <div class="results-header">
+                    <h2 class="results-title">Configuration Technique Recommandée</h2>
+                    <p class="results-subtitle">Optimisée selon vos besoins spécifiques</p>
+                </div>
+                
+                <div class="results-body">
+                    <div class="result-section">
+                        <h3 class="result-title">Projet</h3>
+                        <p class="result-info" id="projectSummary"></p>
+                    </div>
+                    
+                    <div class="result-section">
+                        <h3 class="result-title">Dimensions</h3>
+                        <p class="result-info" id="dimensions"></p>
+                    </div>
+                    
+                    <div class="result-section">
+                        <h3 class="result-title">Spécifications techniques</h3>
+                        <p class="result-info" id="panels"></p>
+                        <p class="result-info" id="resolution"></p>
+                    </div>
+                    
+                    <div class="result-section">
+                        <h3 class="result-title">Matériel recommandé</h3>
+                        <div class="result-info" id="hardware"></div>
+                    </div>
+                    
+                    <div class="result-section">
+                        <h3 class="result-title">Tarification Estimée</h3>
+                        <p class="hint">Ces prix sont donnés à titre indicatif et seront affinés dans notre devis détaillé</p>
+                        <table class="pricing-table" id="pricingTable">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Quantité</th>
+                                    <th>Prix unitaire</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pricingBody">
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3"><strong>Total matériel</strong></td>
+                                    <td id="totalPrice" class="total-price"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    <div class="actions-panel">
+                        <button class="action-btn primary" id="generatePdf">
+                            <i class="fas fa-file-pdf"></i> Générer devis PDF
+                        </button>
+                        <button class="action-btn secondary" id="saveConfig">
+                            <i class="fas fa-save"></i> Enregistrer configuration
+                        </button>
+                        <button class="action-btn secondary" id="sendByEmail">
+                            <i class="fas fa-envelope"></i> Envoyer par email
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Gestion de la progression du formulaire
+        const updateProgress = () => {
+            const totalSections = 9;
+            const visibleSections = totalSections;
+            const progress = (visibleSections / totalSections) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+        };
+        
+        // Initialisation de la progression
+        updateProgress();
+        
+        // Afficher/masquer les champs supplémentaires en fonction des sélections
+        document.getElementById('screenPurpose').addEventListener('change', function() {
+            document.getElementById('otherPurposeGroup').style.display = 
+                this.value === 'autre' ? 'block' : 'none';
+        });
+        
+        document.getElementById('mountingMethod').addEventListener('change', function() {
+            document.getElementById('otherMountingGroup').style.display = 
+                this.value === 'autre' ? 'block' : 'none';
+        });
+        
+        // Gestion des options d'écran spécial (cubique/flex/transparent/semi-transparent)
+        document.getElementById('screenTypeStandard').addEventListener('change', function() {
+            if(this.checked) {
+                document.getElementById('cubicOptions').style.display = 'none';
+                document.getElementById('flexOptions').style.display = 'none';
+                document.getElementById('transparentOptions').style.display = 'none';
+                document.getElementById('semiTransparentOptions').style.display = 'none';
+            }
+        });
+        
+        document.getElementById('screenTypeCubic').addEventListener('change', function() {
+            if(this.checked) {
+                document.getElementById('cubicOptions').style.display = 'block';
+                document.getElementById('flexOptions').style.display = 'none';
+                document.getElementById('transparentOptions').style.display = 'none';
+                document.getElementById('semiTransparentOptions').style.display = 'none';
+            }
+        });
+        
+        document.getElementById('screenTypeFlex').addEventListener('change', function() {
+            if(this.checked) {
+                document.getElementById('cubicOptions').style.display = 'none';
+                document.getElementById('flexOptions').style.display = 'block';
+                document.getElementById('transparentOptions').style.display = 'none';
+                document.getElementById('semiTransparentOptions').style.display = 'none';
+            }
+        });
+        
+        document.getElementById('screenTypeTransparent').addEventListener('change', function() {
+            if(this.checked) {
+                document.getElementById('cubicOptions').style.display = 'none';
+                document.getElementById('flexOptions').style.display = 'none';
+                document.getElementById('transparentOptions').style.display = 'block';
+                document.getElementById('semiTransparentOptions').style.display = 'none';
+            }
+        });
+        
+        document.getElementById('screenTypeSemiTransparent').addEventListener('change', function() {
+            if(this.checked) {
+                document.getElementById('cubicOptions').style.display = 'none';
+                document.getElementById('flexOptions').style.display = 'none';
+                document.getElementById('transparentOptions').style.display = 'none';
+                document.getElementById('semiTransparentOptions').style.display = 'block';
+            }
+        });
+        
+        // Affichage en temps réel des valeurs des sliders
+        document.getElementById('flexCurveRadius').addEventListener('input', function() {
+            document.getElementById('flexRadiusValue').textContent = `${this.value} m`;
+        });
+        
+        document.getElementById('transparencyLevel').addEventListener('input', function() {
+            const value = this.value;
+            document.getElementById('transparencyValue').textContent = `${value}%`;
+            document.getElementById('transparencyOverlay').style.opacity = (100 - value) / 100;
+        });
+        
+        document.getElementById('semiTransparencyLevel').addEventListener('input', function() {
+            const value = this.value;
+            document.getElementById('semiTransparencyValue').textContent = `${value}%`;
+            document.getElementById('semiTransparencyOverlay').style.opacity = (100 - value) / 100;
+        });
+        
+        // Ajuster automatiquement la luminosité en fonction de l'environnement et de l'exposition au soleil
+        function updateBrightness() {
+            const environment = document.querySelector('input[name="environment"]:checked').value;
+            const sunExposure = document.querySelector('input[name="sunExposure"]:checked').value;
+            const brightnessSelect = document.getElementById('brightness');
+            
+            if (environment === 'outdoor') {
+                if (sunExposure === 'yes') {
+                    brightnessSelect.value = '7500';
+                } else if (sunExposure === 'partial') {
+                    brightnessSelect.value = '5000';
+                } else {
+                    brightnessSelect.value = '2500';
+                }
+            } else { // indoor
+                if (sunExposure === 'yes') {
+                    brightnessSelect.value = '2500';
+                } else if (sunExposure === 'partial') {
+                    brightnessSelect.value = '1000';
+                } else {
+                    brightnessSelect.value = '800';
+                }
+            }
+        }
+        
+        // Associer les événements pour la mise à jour automatique de la luminosité
+        document.querySelectorAll('input[name="environment"], input[name="sunExposure"]').forEach(function(elem) {
+            elem.addEventListener('change', updateBrightness);
+        });
+        
+        // Ajuster le pitch recommandé en fonction de la distance de visualisation
+        document.getElementById('viewingDistance').addEventListener('change', function() {
+            const pitchSelect = document.getElementById('pitchPreference');
+            
+            if (this.value === 'proche') {
+                pitchSelect.value = '1.9';
+            } else if (this.value === 'moyen') {
+                pitchSelect.value = '2.6';
+            } else if (this.value === 'loin') {
+                pitchSelect.value = '3.9';
+            } else if (this.value === 'très loin') {
+                pitchSelect.value = '5.9';
+            }
+        });
+        
+        // Soumission du formulaire
+        document.getElementById('configForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Afficher le chargement
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            // Récupérer toutes les données du formulaire
+            const formData = new FormData(this);
+            const formObject = {};
+            
+            formData.forEach((value, key) => {
+                // Conversion des valeurs booléennes
+                if (value === 'true') value = true;
+                if (value === 'false') value = false;
+                
+                // Conversion des valeurs numériques
+                if (key === 'width' || key === 'height' || key === 'numScreens' || 
+                    key === 'pitch' || key === 'brightness' || key === 'flexCurveRadius' ||
+                    key === 'cubeFaces' || key === 'flexAngle' || key === 'transparencyLevel' ||
+                    key === 'semiTransparencyLevel') {
+                    value = parseFloat(value);
+                }
+                
+                formObject[key] = value;
+            });
+            
+            // Récupérer l'état des toggles (comme separateDisplays)
+            formObject.separateDisplays = document.getElementById('separateDisplaysYes').checked;
+            formObject.redundancy = document.getElementById('redundancyYes').checked;
+            formObject.allInOne = document.getElementById('allInOneYes').checked ? "yes" : "no";
+            formObject.maintenanceContract = document.getElementById('maintenanceYes').checked ? "yes" : "no";
+            formObject.rapidSAV = document.getElementById('rapidSAVYes').checked ? "yes" : "no";
+            formObject.rearProjection = document.getElementById('rearProjection')?.checked || false;
+            
+            // Remplacez par l'URL de votre webhook N8N
+            const webhookUrl = 'https://n8n.tecaled.fr/webhook-test/led-config';
+            
+            // Simuler une réponse pour la démonstration (à remplacer par l'appel API réel)
+            setTimeout(() => {
+                // Masquer le chargement
+                document.getElementById('loading').style.display = 'none';
+                
+                // Simuler une réponse (à remplacer par la vraie réponse de l'API)
+                const data = simulateResponse(formObject);
+                
+                // Projet résumé
+                const clientName = document.getElementById('clientName').value;
+                document.getElementById('projectSummary').textContent = 
+                    `Client: ${clientName} | Type: ${formObject.screenPurpose} | Environnement: ${formObject.environment}`;
+                
+                // Dimensions
+                document.getElementById('dimensions').textContent = 
+                    `Dimensions réelles: ${data.dimensions.actualWidth}×${data.dimensions.actualHeight} m`;
+                
+                // Panneaux et résolution
+                document.getElementById('panels').textContent = 
+                    `Configuration: ${data.panels.configuration}, Total: ${data.panels.total} dalles`;
+                
+                document.getElementById('resolution').textContent = 
+                    `Pitch: ${formObject.pitchPreference || "3.9"}mm | Pixels par écran: ${data.resolution.perScreen.toLocaleString()}, 
+                    Pixels totaux: ${data.resolution.total.toLocaleString()}`;
+                
+                // Matériel
+                let hardwareHtml = '<h4>Processeurs</h4><ul class="processor-list">';
+                data.hardware.processors.forEach(proc => {
+                    hardwareHtml += `
+                        <li class="processor-item">
+                            <div class="processor-info">
+                                <div class="processor-model">${proc.model}</div>
+                                <div class="processor-screen">Écran ${proc.screen || 'Tous'}</div>
+                            </div>
+                            <div class="processor-usage">${proc.capacityUtilization}</div>
+                        </li>`;
+                });
+                hardwareHtml += `</ul>`;
+                hardwareHtml += `<p>Bumpers nécessaires: ${data.hardware.bumpers}</p>`;
+                hardwareHtml += `<p>Câbles RJ45: ${data.hardware.cables}</p>`;
+                hardwareHtml += `<p>Alimentations: ${data.hardware.powerSupplies}</p>`;
+                
+                // Ajouter des informations spécifiques pour les écrans spéciaux si nécessaire
+                if (data.specialScreenInfo) {
+                    hardwareHtml += `<h4>Configuration spéciale</h4>`;
+                    hardwareHtml += `<p>${data.specialScreenInfo}</p>`;
+                }
+                
+                document.getElementById('hardware').innerHTML = hardwareHtml;
+                
+                // Tarification
+                const pricingBody = document.getElementById('pricingBody');
+                pricingBody.innerHTML = '';
+                
+                data.pricing.items.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.description}</td>
+                        <td>${item.quantity}</td>
+                        <td class="price">${item.unitPrice.toLocaleString()}€</td>
+                        <td class="price">${item.total.toLocaleString()}€</td>
+                    `;
+                    pricingBody.appendChild(row);
+                });
+                
+                document.getElementById('totalPrice').textContent = `${data.pricing.totalPrice.toLocaleString()}€ HT`;
+                
+                // Afficher les résultats
+                document.getElementById('results').style.display = 'block';
+                
+                // Faire défiler jusqu'aux résultats
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+                
+            }, 1500); // Simuler un délai de chargement
+        });
+        
+        // Fonction de simulation de réponse (à remplacer par l'appel API réel)
+        function simulateResponse(formData) {
+            // Cette fonction simule la réponse que vous obtiendriez de N8N
+            // À remplacer par le vrai appel API quand vous serez prêt
+            
+            const screenType = formData.screenType || "standard";
+            const width = formData.width;
+            const height = formData.height;
+            const numScreens = formData.numScreens;
+            const pitch = formData.pitchPreference || 3.9;
+            const panelSize = formData.panelSize || "500x500";
+            const [panelWidth, panelHeight] = panelSize.split("x").map(dim => parseInt(dim, 10));
+            
+            // Calculs de base similaires à ceux du backend
+            let panelsWide = Math.ceil(width * 1000 / panelWidth);
+            let panelsHigh = Math.ceil(height * 1000 / panelHeight);
+            let panelsPerScreen = panelsWide * panelsHigh;
+            let totalPanels = panelsPerScreen * numScreens;
+            
+            const pixelsPerPanelW = Math.round(panelWidth / pitch);
+            const pixelsPerPanelH = Math.round(panelHeight / pitch);
+            const pixelsPerPanel = pixelsPerPanelW * pixelsPerPanelH;
+            const pixelsPerScreen = pixelsPerPanel * panelsPerScreen;
+            const totalPixels = pixelsPerScreen * numScreens;
+            
+            // Facteur de prix selon le type d'écran
+            let priceMultiplier = 1;
+            let specialScreenInfo = null;
+            
+            if (screenType === "cubic") {
+                priceMultiplier = 1.4;
+                specialScreenInfo = `Structure cubique avec ${formData.cubeFaces} faces visibles par cube. `;
+                specialScreenInfo += `Disposition en ${formData.cubeArrangement === "grid" ? "grille régulière" : 
+                                  formData.cubeArrangement === "pyramid" ? "pyramide" : 
+                                  formData.cubeArrangement === "random" ? "arrangement irrégulier" : "configuration personnalisée"}.`;
+            } else if (screenType === "flex") {
+                priceMultiplier = formData.flexAngle > 180 ? 1.5 : 1.3;
+                specialScreenInfo = `Écran flexible avec un rayon de ${formData.flexCurveRadius}m et un angle de ${formData.flexAngle}°. `;
+                specialScreenInfo += `Montage sur ${formData.flexMounting === "wall" ? "mur courbe" : 
+                                  formData.flexMounting === "column" ? "colonne/pilier" : 
+                                  formData.flexMounting === "suspended" ? "structure suspendue" : "structure autoportante"}.`;
+            } else if (screenType === "transparent") {
+                priceMultiplier = 2.2;
+                specialScreenInfo = `Écran transparent avec ${formData.transparencyLevel}% de transparence. `;
+                specialScreenInfo += `Application: ${formData.transparentApplication}. `;
+                if (formData.rearProjection) {
+                    specialScreenInfo += "Compatible avec l'arrière-projection.";
+                }
+            } else if (screenType === "semitransparent") {
+                priceMultiplier = 1.8;
+                specialScreenInfo = `Écran semi-transparent avec ${formData.semiTransparencyLevel}% de transparence. `;
+                specialScreenInfo += `Densité de pixels: ${formData.pixelDensity}.`;
+            }
+            
+            // Base de prix simulée
+            let panelBasePrice = 120;
+            
+            // Ajuster le prix des dalles selon l'environnement et la luminosité
+            if (formData.environment === "outdoor") {
+                if (formData.brightness >= 5000) {
+                    panelBasePrice = 250;
+                } else {
+                    panelBasePrice = 180;
+                }
+            } else { // indoor
+                if (formData.brightness >= 2500) {
+                    panelBasePrice = 150;
+                }
+            }
+            
+            // Ajuster le prix pour le pitch plus fin
+            if (pitch <= 2.6) {
+                panelBasePrice *= 1.5;
+            } else if (pitch <= 1.9) {
+                panelBasePrice *= 2.2;
+            }
+            
+            // Appliquer le multiplicateur pour les écrans spéciaux
+            panelBasePrice *= priceMultiplier;
+            
+            // Générer la réponse
+            return {
+                dimensions: {
+                    actualWidth: (panelsWide * panelWidth / 1000).toFixed(2),
+                    actualHeight: (panelsHigh * panelHeight / 1000).toFixed(2)
+                },
+                panels: {
+                    perScreen: panelsPerScreen,
+                    total: totalPanels,
+                    configuration: `${panelsWide}×${panelsHigh} par écran`
+                },
+                resolution: {
+                    perPanel: pixelsPerPanel,
+                    perScreen: pixelsPerScreen,
+                    total: totalPixels
+                },
+                hardware: {
+                    processors: [
+                        {
+                            screen: 1,
+                            model: "VX400",
+                            portsUsed: formData.redundancy ? 2 : 1,
+                            capacityUtilization: "9.5%"
+                        },
+                        {
+                            screen: 2,
+                            model: "VX400",
+                            portsUsed: formData.redundancy ? 2 : 1,
+                            capacityUtilization: "9.5%"
+                        }
+                    ],
+                    bumpers: Math.ceil(totalPanels * (screenType === "standard" ? 0.5 : 0.7)),
+                    cables: (formData.redundancy ? 2 : 1) * numScreens,
+                    powerSupplies: numScreens
+                },
+                specialScreenInfo: specialScreenInfo,
+                pricing: {
+                    items: [
+                        {
+                            description: `Dalles LED ${pitch}mm (${formData.environment === "outdoor" ? "Extérieur" : "Intérieur"}, ${formData.brightness} nits)${screenType !== "standard" ? " - " + 
+                            (screenType === "cubic" ? "Cubique" : 
+                             screenType === "flex" ? "Flexible" : 
+                             screenType === "transparent" ? "Transparent" : "Semi-transparent") : ""}`,
+                            quantity: totalPanels,
+                            unitPrice: Math.round(panelBasePrice),
+                            total: Math.round(totalPanels * panelBasePrice)
+                        },
+                        {
+                            description: "Processeurs",
+                            quantity: numScreens,
+                            unitPrice: 1200,
+                            total: numScreens * 1200
+                        },
+                        {
+                            description: "Bumpers",
+                            quantity: Math.ceil(totalPanels * (screenType === "standard" ? 0.5 : 0.7)),
+                            unitPrice: 45,
+                            total: Math.ceil(totalPanels * (screenType === "standard" ? 0.5 : 0.7)) * 45
+                        },
+                        {
+                            description: "Câbles RJ45",
+                            quantity: (formData.redundancy ? 2 : 1) * numScreens,
+                            unitPrice: 12,
+                            total: (formData.redundancy ? 2 : 1) * numScreens * 12
+                        },
+                        {
+                            description: "Alimentations",
+                            quantity: numScreens,
+                            unitPrice: 85,
+                            total: numScreens * 85
+                        }
+                    ],
+                    totalPrice: 0 // Sera calculé ci-dessous
+                }
+            };
+        }
+        
+        // Actions des boutons de résultat
+        document.getElementById('generatePdf').addEventListener('click', function() {
+            alert('La génération de PDF sera implémentée dans la version complète.');
+        });
+        
+        document.getElementById('saveConfig').addEventListener('click', function() {
+            alert('L\'enregistrement de la configuration sera implémenté dans la version complète.');
+        });
+        
+        document.getElementById('sendByEmail').addEventListener('click', function() {
+            alert('L\'envoi par email sera implémenté dans la version complète.');
+        });
+    </script>
+</body>
+</html>
