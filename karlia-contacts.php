@@ -32,6 +32,15 @@ if (empty($search)) {
     exit;
 }
 
+// Vérifier la longueur minimale de recherche
+if (strlen($search) < 3) {
+    echo json_encode([
+        'error' => 'Le terme de recherche doit contenir au moins 3 caractères',
+        'items' => []
+    ]);
+    exit;
+}
+
 // Construire l'URL pour la recherche de contacts
 $url = "https://karlia.fr/app/api/v2/contacts?q=" . urlencode($search) . "&limit=10";
 debug_log("URL appelée: " . $url);
@@ -45,6 +54,9 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Authorization: Bearer ' . $api_key,
     'Accept: application/json'
 ]);
+
+// Définir un timeout pour éviter les attentes trop longues
+curl_setopt($ch, CURLOPT_TIMEOUT, 5);
 
 // Exécuter la requête
 $response = curl_exec($ch);
@@ -63,7 +75,8 @@ if ($http_code != 200) {
     echo json_encode([
         'error' => 'Erreur lors de la communication avec KARLIA',
         'code' => $http_code,
-        'details' => $error
+        'details' => $error,
+        'items' => []
     ]);
     exit;
 }

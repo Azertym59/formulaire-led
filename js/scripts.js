@@ -183,155 +183,133 @@ function initPitchRecommendation() {
 }
 
 // ==========================================================================
-// INTÉGRATION AVEC KARLIA (VERSION SIMPLIFIÉE)
+// INTÉGRATION AVEC KARLIA
 // ==========================================================================
 
 /**
  * Initialisation de la recherche client KARLIA
  */
 function initKarliaSearch() {
-    document.getElementById('searchClientBtn').addEventListener('click', searchClient);
-}
-
-/**
- * Rechercher un client dans KARLIA
- * Utilise un simple script PHP comme proxy pour contourner les restrictions CORS
- */
-async function searchClient() {
-    const searchTerm = document.getElementById('clientSearch').value.trim();
+    // Récupération des éléments du DOM
+    const searchInput = document.getElementById('clientSearch');
+    const searchButton = document.getElementById('searchClientBtn');
+    const searchResults = document.getElementById('searchResults');
+    const clientResults = document.getElementById('clientResults');
+    const clientSourceIndicator = document.getElementById('clientSourceIndicator');
     
-    if (searchTerm.length < 2) {
-        alert('Veuillez saisir au moins 2 caractères pour la recherche.');
-        return;
+    // Fonction de debounce pour limiter les appels
+    function debounce(func, wait) {
+        let timeout;
+        return function() {
+            const context = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                func.apply(context, args);
+            }, wait);
+        };
     }
     
-    // Afficher un indicateur de chargement
-    document.getElementById('clientResults').innerHTML = '<p>Recherche en cours...</p>';
-    document.getElementById('searchResults').style.display = 'block';
-    
-    try {
-        // Appel direct au script PHP simplifié
-        const response = await fetch(`karlia-contacts.php?q=${encodeURIComponent(searchTerm)}`);
+    // Fonction pour effectuer la recherche
+    function performSearch() {
+        const query = searchInput.value.trim();
         
-        if (!response.ok) {
-            throw new Error(`Erreur HTTP: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        // Si erreur dans la réponse
-        if (data.error) {
-            throw new Error(data.error);
-        }
-        
-        // Récupérer les contacts (adapter selon la structure retournée)
-        const contacts = data.items || data.contacts || data.data || [];
-        
-        if (contacts.length === 0) {
-            document.getElementById('clientResults').innerHTML = '<p>Aucun contact trouvé.</p>';
+        // Ne pas rechercher si moins de 3 caractères
+        if (query.length < 3) {
+            searchResults.style.display = 'none';
             return;
         }
         
-        // Afficher les résultats
-        displayKarliaContacts(contacts);
+        // Afficher l'indicateur de chargement
+        clientResults.innerHTML = '<div class="loading-indicator"><div class="spinner"></div><p>Recherche en cours...</p></div>';
+        searchResults.style.display = 'block';
         
-    } catch (error) {
-        console.error('Erreur lors de la recherche:', error);
-        document.getElementById('clientResults').innerHTML = `<p class="error">Erreur lors de la recherche: ${error.message}</p>`;
+        // Appel au proxy PHP
+        fetch(`karlia-contacts.php?q=${encodeURIComponent(query)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erreur de communication avec le serveur');
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayResults(data);
+            })
+            .catch(error => {
+                console.error('Erreur de recherche:', error);
+                clientResults.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-circle"></i> ${error.message}</div>`;
+            });
     }
-}
-
-/**
- * Affiche les contacts trouvés dans l'interface
- * @param {Array} contacts - Liste des contacts à afficher
- */
-function displayKarliaContacts(contacts) {
-    let html = '<div class="client-list">';
     
-    contacts.forEach(contact => {
-        // Adapter ces propriétés selon la structure réelle de KARLIA
-        const firstName = contact.first_name || contact.firstName || '';
-        const lastName = contact.last_name || contact.lastName || '';
-        const company = contact.company || '';
-        const email = contact.email || '';
+    // Fonction pour afficher les résultats
+    function displayResults(data) {
+        // Vider les résultats précédents
+        clientResults.innerHTML = '';
         
-        html += `
-            <div class="client-item" data-contact-index="${contacts.indexOf(contact)}">
-                <div class="client-name">${company ? company : `${firstName} ${lastName}`.trim()}</div>
-                <div class="client-detail">
-                    ${company ? `${firstName} ${lastName}`.trim() + ' | ' : ''}
-                    ${email}
-                </div>
-            </div>
-        `;
-    });
-    
-    html += '</div>';
-    document.getElementById('clientResults').innerHTML = html;
-    
-    // Stocker les contacts dans une variable globale temporaire pour faciliter la sélection
-    window._tempKarliaContacts = contacts;
-    
-    // Ajouter les événements de clic pour sélectionner un contact
-    document.querySelectorAll('.client-item').forEach(item => {
-        item.addEventListener('click', function() {
-            const contactIndex = parseInt(this.getAttribute('data-contact-index'));
-            const selectedContact = window._tempKarliaContacts[contactIndex];
+        // Vérifier si des résultats sont disponibles
+        if (!data.items || data.items.length === 0) {
+            clientResults.innerHTML = '<div class="no-results">Aucun client trouvé. Veuillez créer un nouveau client.</div>';
+            return;
+        }
+        
+        // Créer une liste pour les résultats
+        const resultsList = document.createElement('ul');
+        resultsList.className = 'clients-list';
+        
+        // Ajouter chaque client à la liste
+        data.items.forEach(client => {
+            const listItem = document.createElement('li');
+            listItem.className = 'client-item';
             
-            if (selectedContact) {
-                populateClientFields(selectedContact);
-                document.getElementById('searchResults').style.display = 'none';
-                document.getElementById('clientSearch').value = '';
-            }
+            // Créer le contenu de l'élément
+            listItem.innerHTML = `
+                <div class="client-name">${client.name || 'Sans nom'}</div>
+                <div class="client-details">
+                    ${client.email ? `<div><i class="fas fa-envelope"></i> ${client.email}</div>` : ''}
+                    ${client.phone ? `<div><i class="fas fa-phone"></i> ${client.phone}</div>` : ''}
+                    ${client.company ? `<div><i class="fas fa-building"></i> ${client.company}</div>` : ''}
+                </div>
+            `;
+            
+            // Ajouter un gestionnaire d'événements pour la sélection du client
+            listItem.addEventListener('click', () => {
+                selectClient(client);
+            });
+            
+            resultsList.appendChild(listItem);
         });
-    });
-}
-
-/**
- * Remplit les champs du formulaire avec les données du contact
- * @param {Object} contact - Données du contact KARLIA
- */
-function populateClientFields(contact) {
-    // Adapter selon la structure réelle de KARLIA
-    const firstName = contact.first_name || contact.firstName || '';
-    const lastName = contact.last_name || contact.lastName || '';
-    const company = contact.company || '';
-    
-    // Remplir le champ Nom/Société
-    document.getElementById('clientName').value = company 
-        ? `${firstName} ${lastName} - ${company}`.trim() 
-        : `${firstName} ${lastName}`.trim();
-    
-    // Remplir le champ Email
-    document.getElementById('clientEmail').value = contact.email || '';
-    
-    // Remplir le champ Téléphone (essayer plusieurs propriétés possibles)
-    document.getElementById('clientPhone').value = contact.phone || contact.phone_number || contact.mobile || '';
-    
-    // Essayer de construire l'adresse à partir des informations disponibles
-    let addressParts = [];
-    
-    // Si l'adresse est un objet complet
-    if (contact.address && typeof contact.address === 'object') {
-        if (contact.address.street) addressParts.push(contact.address.street);
-        if (contact.address.postal_code || contact.address.city) {
-            addressParts.push(`${contact.address.postal_code || ''} ${contact.address.city || ''}`.trim());
-        }
-        if (contact.address.country) addressParts.push(contact.address.country);
-    } 
-    // Si l'adresse est en propriétés distinctes (ou chaîne simple)
-    else {
-        if (contact.street || contact.address) addressParts.push(contact.street || contact.address);
-        if (contact.postal_code || contact.postalCode || contact.city) {
-            addressParts.push(`${contact.postal_code || contact.postalCode || ''} ${contact.city || ''}`.trim());
-        }
-        if (contact.country) addressParts.push(contact.country);
+        
+        clientResults.appendChild(resultsList);
     }
     
-    document.getElementById('clientAddress').value = addressParts.join('\n');
+    // Fonction pour sélectionner un client
+    function selectClient(client) {
+        // Remplir les champs du formulaire
+        document.getElementById('clientName').value = client.name || client.company || '';
+        document.getElementById('clientEmail').value = client.email || '';
+        document.getElementById('clientPhone').value = client.phone || '';
+        document.getElementById('clientAddress').value = client.address || '';
+        
+        // Afficher l'indicateur "Importé de KARLIA"
+        clientSourceIndicator.style.display = 'block';
+        
+        // Masquer les résultats de recherche
+        searchResults.style.display = 'none';
+        
+        // Réinitialiser le champ de recherche
+        searchInput.value = '';
+    }
     
-    // Afficher l'indicateur de source
-    document.getElementById('clientSourceIndicator').style.display = 'block';
+    // Attacher les événements
+    searchInput.addEventListener('input', debounce(performSearch, 300));
+    searchButton.addEventListener('click', performSearch);
+    
+    // Permettre la recherche avec la touche Entrée
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            performSearch();
+        }
+    });
 }
 
 // ==========================================================================
